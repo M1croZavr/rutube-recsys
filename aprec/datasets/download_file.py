@@ -4,6 +4,8 @@ import os
 import requests
 
 from aprec.utils.os_utils import mkdir_p_local, get_dir
+
+
 def download_file(url, filename, data_dir):
     mkdir_p_local(data_dir)
     full_filename = os.path.join(get_dir(), data_dir, filename)

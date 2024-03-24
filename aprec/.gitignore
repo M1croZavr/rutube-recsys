@@ -1,6 +1,6 @@
 data/
 data
-!aprec/data/bert4rec/rutube.txt
+!data/bert4rec/rutube.txt
 .idea/
 evaluation/results/*
 *__pycache__/
