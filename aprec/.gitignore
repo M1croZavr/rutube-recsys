@@ -1,0 +1,9 @@
+data/
+data
+!aprec/data/bert4rec/rutube.txt
+.idea/
+evaluation/results/*
+*__pycache__/
+*.ipynb_checkpoints/
+.DS_Store
+debug.py
