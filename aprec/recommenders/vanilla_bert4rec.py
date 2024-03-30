@@ -1,4 +1,4 @@
-#This code uses port of the original bert4rec implementation
+# This code uses port of the original bert4rec implementation
 import copy
 import json
 import os
@@ -17,30 +17,30 @@ from aprec.utils.item_id import ItemId
 
 class VanillaBERT4Rec(Recommender):
     def __init__(self,
-                 max_seq_length = 200,
-                 masked_lm_prob = 0.2,
-                 max_predictions_per_seq = 20,
-                 batch_size = 256,
-                 num_train_steps = 400000,
-                 prop_sliding_window = 0.5,
-                 mask_prob = 1.0,
-                 dupe_factor = 10,
-                 pool_size = 10,
-                 num_warmup_steps = 100,
-                 learning_rate = 1e-4,
-                 random_seed = 31337,
+                 max_seq_length=200,
+                 masked_lm_prob=0.2,
+                 max_predictions_per_seq=20,
+                 batch_size=256,
+                 num_train_steps=400000,
+                 prop_sliding_window=0.5,
+                 mask_prob=1.0,
+                 dupe_factor=10,
+                 pool_size=10,
+                 num_warmup_steps=100,
+                 learning_rate=1e-4,
+                 random_seed=31337,
                  training_time_limit=None,
 
-                 attention_probs_dropout_prob = 0.2,
-                 hidden_act = "gelu",
-                 hidden_dropout_prob = 0.2,
-                 hidden_size = 64,
-                 initializer_range = 0.02,
-                 intermediate_size = 256,
-                 max_position_embeddings = 200,
-                 num_attention_heads = 2,
-                 num_hidden_layers = 2,
-                 type_vocab_size = 2):
+                 attention_probs_dropout_prob=0.2,
+                 hidden_act="gelu",
+                 hidden_dropout_prob=0.2,
+                 hidden_size=64,
+                 initializer_range=0.02,
+                 intermediate_size=256,
+                 max_position_embeddings=200,
+                 num_attention_heads=2,
+                 num_hidden_layers=2,
+                 type_vocab_size=2):
         super().__init__()
         self.user_actions = defaultdict(list)
         self.user_ids = ItemId()
@@ -87,7 +87,7 @@ class VanillaBERT4Rec(Recommender):
             user_str, doc = self.get_bert4rec_doc(user)
             doc_for_prediction = doc + pred_item
 
-            #mask_last code in the vanilla bert4rec implementation requires at least two docs in the collection
+            # mask_last code in the vanilla bert4rec implementation requires at least two docs in the collection
             if len(doc) > 1:
                 bert4rec_docs[user_str] = doc
 
@@ -99,14 +99,14 @@ class VanillaBERT4Rec(Recommender):
             for k, v in bert4rec_pred_docs.items()
         }
 
-        train_instances = create_training_instances(bert4rec_docs, self.max_seq_length, self.dupe_factor, self.masked_lm_prob,
-                                              self.max_predictions_per_seq, self.rng, vocab, self.mask_prob,
-                                              self.prop_sliding_window, self.pool_size, False)
+        train_instances = create_training_instances(bert4rec_docs, self.max_seq_length, self.dupe_factor,
+                                                    self.masked_lm_prob,
+                                                    self.max_predictions_per_seq, self.rng, vocab, self.mask_prob,
+                                                    self.prop_sliding_window, self.pool_size, False)
 
         pred_instances = create_training_instances(bert4rec_pred_docs, self.max_seq_length, 1, self.masked_lm_prob,
-                                              self.max_predictions_per_seq, self.rng, vocab, self.mask_prob,
-                                              -1, self.pool_size, True)
-
+                                                   self.max_predictions_per_seq, self.rng, vocab, self.mask_prob,
+                                                   -1, self.pool_size, True)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             train_instances_filename = os.path.join(tmpdir, "train_instances.tfrecords")
@@ -115,10 +115,8 @@ class VanillaBERT4Rec(Recommender):
             pred_instances_filename = os.path.join(tmpdir, "pred_instances.tfrecords")
             pred_instances_file = open(pred_instances_filename, "wb")
 
-
             sampled_instances_filename = os.path.join(tmpdir, "sampled_instances.csv")
             self.write_sampled_instances(sampled_instances_filename)
-
 
             bert_config_filename = os.path.join(tmpdir, "bert_config_file.json")
             bert_config_file = open(bert_config_filename, "wb")
@@ -126,20 +124,19 @@ class VanillaBERT4Rec(Recommender):
             vocab_filename = os.path.join(tmpdir, "vocab.pickle")
             vocab_file = open(vocab_filename, "wb")
 
-            history_filename =  os.path.join(tmpdir, "history.pickle")
+            history_filename = os.path.join(tmpdir, "history.pickle")
             history_file = open(history_filename, "wb")
 
-
-            predictions_filename =  os.path.join(tmpdir, "predictions.csv")
+            predictions_filename = os.path.join(tmpdir, "predictions.csv")
             sampled_predictions_filename = os.path.join(tmpdir, "sampled_predictions")
 
             write_instance_to_example_file(train_instances,
-                                       self.max_seq_length,
-                                       self.max_predictions_per_seq, vocab, train_instances_file.name,)
+                                           self.max_seq_length,
+                                           self.max_predictions_per_seq, vocab, train_instances_file.name, )
 
             write_instance_to_example_file(pred_instances,
                                            self.max_seq_length,
-                                           self.max_predictions_per_seq, vocab, pred_instances_file.name,)
+                                           self.max_predictions_per_seq, vocab, pred_instances_file.name, )
             bert_config = copy.deepcopy(self.bert_config)
             bert_config["vocab_size"] = vocab.get_vocab_size()
             bert_config_file.write(json.dumps(bert_config, indent=4).encode("utf-8"))
@@ -174,25 +171,25 @@ class VanillaBERT4Rec(Recommender):
         bert4rec_dir = os.path.dirname(BERT4rec.__file__)
         bert4rec_runner = os.path.join(bert4rec_dir, "run.py")
         signature = tmpdir.split("/")[-1]
-        cmd = f"python {bert4rec_runner}\
-            --train_input_file={train_instances_filename} \
-            --test_input_file={pred_instances_filename} \
-            --vocab_filename={vocab_filename} \
-            --user_history_filename={user_history_filename} \
-            --checkpointDir={tmpdir} \
-            --signature={signature}\
-            --do_train=True \
-            --do_eval=True \
-            --bert_config_file={bert_config_filename} \
-            --batch_size={self.batch_size} \
-            --max_seq_length={self.max_seq_length} \
-            --max_predictions_per_seq={self.max_predictions_per_seq} \
-            --num_train_steps={self.num_train_steps} \
-            --num_warmup_steps={self.num_warmup_steps} \
-            --save_predictions_file={predictions_filename} \
-            --sampled_instances_file={sampled_instances_filename} \
-            --save_sampled_predictions_file={sampled_predictions_file}\
-            --learning_rate={self.learning_rate} "
+        cmd = f"python {bert4rec_runner} \
+--train_input_file={train_instances_filename} \
+--test_input_file={pred_instances_filename} \
+--vocab_filename={vocab_filename} \
+--user_history_filename={user_history_filename} \
+--checkpointDir={tmpdir} \
+--signature={signature} \
+--do_train=True \
+--do_eval=True \
+--bert_config_file={bert_config_filename} \
+--batch_size={self.batch_size} \
+--max_seq_length={self.max_seq_length} \
+--max_predictions_per_seq={self.max_predictions_per_seq} \
+--num_train_steps={self.num_train_steps} \
+--num_warmup_steps={self.num_warmup_steps} \
+--save_predictions_file={predictions_filename} \
+--sampled_instances_file={sampled_instances_filename} \
+--save_sampled_predictions_file={sampled_predictions_file} \
+--learning_rate={self.learning_rate} "
 
         if self.training_time_limit is not None:
             cmd += f" --training_time_limit={self.training_time_limit}"
@@ -201,7 +198,6 @@ class VanillaBERT4Rec(Recommender):
         self.predictions_cache = self.read_predictions_cache(predictions_filename)
         self.sampled_items_ranking_predictions_cache = self.read_predictions_cache(sampled_predictions_file)
         pass
-
 
     def read_predictions_cache(self, predictions_filename):
         result = {}
@@ -237,7 +233,6 @@ class VanillaBERT4Rec(Recommender):
             sampled_instances_file.write(";".join([user_id] + item_ids) + "\n")
         sampled_instances_file.close()
 
-
     def get_item_rankings(self):
         result = {}
         for request in self.items_ranking_requests:
@@ -250,5 +245,3 @@ class VanillaBERT4Rec(Recommender):
                 user_result.append((external_item_id, score))
             result[request.user_id] = user_result
         return result
-
-

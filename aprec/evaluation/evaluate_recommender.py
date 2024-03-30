@@ -49,11 +49,12 @@ def evaluate_recommender(recommender, test_actions,
         user_id = all_user_ids[i]
         predictions = all_predictions[i]
         user_test_actions = test_actions_by_user[user_id]
-        user_doc = {"user_id": user_id,
-                    "metrics": {},
-                    "test_actions": [action.to_json() for action in user_test_actions],
-                    "predictions": [(prediction[0], float(prediction[1])) for prediction in predictions],
-                    }
+        user_doc = {
+            "user_id": user_id,
+            "metrics": {},
+            "test_actions": [action.to_json() for action in user_test_actions],
+            "predictions": [(prediction[0], float(prediction[1])) for prediction in predictions],
+        }
         if evaluate_on_samples:
             user_doc["sampled_metrics"] = {}
         for metric in metrics:
@@ -104,7 +105,6 @@ class RecommendersEvaluator(object):
         self.out_dir = out_dir
         self.features_from_test = None
         self.n_val_users = n_val_users
-        # Lists of sorted actions with the last timestamp user's item for the test list
         self.train, self.test = self.data_splitter(actions)
         self.save_split(self.train, self.test)
         if remove_cold_start:
@@ -130,7 +130,7 @@ class RecommendersEvaluator(object):
     def __call__(self):
         # Main call of running experiments
         result = {"recommenders": {}}
-        print(f"Recommenders to evaluate:\n")
+        print(f"Recommenders to evaluate:")
         for i, recommender_name in enumerate(self.recommenders, start=1):
             print(f"{i}. {recommender_name}")
         for recommender_name in self.recommenders:
@@ -164,7 +164,7 @@ class RecommendersEvaluator(object):
                 build_time_end = time.time()
                 print("\tDONE")
 
-                print("calculating metrics...")
+                print("\tCalculating metrics...")
                 evaluate_time_start = time.time()
                 evaluation_result = evaluate_recommender(recommender, self.test,
                                                          self.metrics, self.out_dir,
@@ -172,12 +172,11 @@ class RecommendersEvaluator(object):
                                                          recommendations_limit=self.recommendations_limit,
                                                          evaluate_on_samples=self.sampled_requests is not None)
                 evaluate_time_end = time.time()
-                print("calculating metrics...")
                 evaluation_result['model_build_time'] = build_time_end - build_time_start
                 evaluation_result['model_inference_time'] = evaluate_time_end - evaluate_time_start
                 evaluation_result['model_metadata'] = copy.deepcopy(recommender.get_metadata())
-                print("done")
-                print(json.dumps(evaluation_result))
+                print("\tDONE")
+                print('Evaluation(test instances inference) result...', json.dumps(evaluation_result))
                 result['recommenders'][recommender_name] = evaluation_result
                 for callback in self.callbacks:
                     callback(recommender, recommender_name, evaluation_result, self.experiment_config)

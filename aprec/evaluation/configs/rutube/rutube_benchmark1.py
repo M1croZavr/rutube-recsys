@@ -9,6 +9,7 @@ from aprec.evaluation.metrics.hit import HIT
 
 from aprec.recommenders.filter_seen_recommender import FilterSeenRecommender
 
+# Use every fraction * 100% user of all actions
 USERS_FRACTIONS = [1.0]  # + [0.1, 0.05]
 
 
@@ -17,16 +18,13 @@ def original_ber4rec(training_steps):
     return recommender
 
 
-# recommenders = {
-#      "original_bert4rec-200000": lambda: original_ber4rec(200000)
-# }
 recommenders = {
-    "original_bert4rec-100": lambda: original_ber4rec(100)
+    "original_bert4rec-25000": lambda: original_ber4rec(25000)
 }
 
 # Параметр - до скольки айтемов дополнять тестовый список actionов
 TARGET_ITEMS_SAMPLER = PopTargetItemsSampler(10)
-METRICS = [HIT(1), HIT(5), HIT(10), NDCG(5), NDCG(10), MRR(), HIT(4), NDCG(40), MAP(10)]
+METRICS = [HIT(1), HIT(5), HIT(10), MAP(1), MAP(5), MAP(10), NDCG(5), NDCG(10), MRR()]
 
 
 def get_recommenders(filter_seen: bool, filter_recommenders=None):
@@ -50,5 +48,6 @@ DATASET = "BERT4rec.rutube"
 N_VAL_USERS = 1024
 # MAX_TEST_USERS - в случае LeaveOneOut это сколько пользователей будут оцениваться по последнему действию
 MAX_TEST_USERS = 2048
+# Returns lists of sorted actions with the last timestamp user's item for the test list
 SPLIT_STRATEGY = LeaveOneOut(MAX_TEST_USERS)
 RECOMMENDERS = get_recommenders(filter_seen=True)

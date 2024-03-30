@@ -15,7 +15,7 @@ config_id="${config_filename%.*}"
 
 date=`date +%Y_%m_%dT%H_%M_%S`
 experiment_id="${config_id}_${date}"
-# e.g. ./results/rutube_benchmark_2024_01_01T12_12_12
+# e.g. ./results/rutube_benchmark1_2024_01_01T12_12_12
 root_dir=./results/$experiment_id
 experiment_stdout=$root_dir/stdout
 experiment_stderr=$root_dir/stderr
