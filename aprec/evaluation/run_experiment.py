@@ -14,7 +14,7 @@ import tensorflow as tf
 def config():
     """ from https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path"""
 
-    # e.g. configs/bert4rec_repro_paper/rutube_benchmark1.py
+    # e.g. configs/rutube/rutube_benchmark1.py
     spec = importlib.util.spec_from_file_location("config", sys.argv[1])
 
     config = importlib.util.module_from_spec(spec)

@@ -37,13 +37,13 @@ def evaluate_recommender(recommender, test_actions,
         else:
             requests.append((user_id, None))
 
-    print("generating predictions...")
+    print("\tGenerating predictions...")
     all_predictions = recommender.recommend_batch(requests, recommendations_limit)
 
     if evaluate_on_samples:
         sampled_rankings = recommender.get_item_rankings()
 
-    print('calculating metrics...')
+    print('\tCalculating metrics...')
     user_docs = []
     for i in tqdm(range(len(all_user_ids)), ascii=True):
         user_id = all_user_ids[i]
