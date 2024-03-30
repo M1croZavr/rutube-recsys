@@ -23,6 +23,7 @@ recommenders = {
 }
 
 # Параметр - до скольки айтемов дополнять тестовый список actionов
+# Sampling - оценка по сэмплингу, то есть ранжирование по тестовым айтемам, которые случайно засемплены
 TARGET_ITEMS_SAMPLER = PopTargetItemsSampler(10)
 METRICS = [HIT(1), HIT(5), HIT(10), MAP(1), MAP(5), MAP(10), NDCG(5), NDCG(10), MRR()]
 
