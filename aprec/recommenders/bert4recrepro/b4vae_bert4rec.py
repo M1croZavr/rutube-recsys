@@ -10,6 +10,7 @@ from b4rvae.trainers.bert import BERTTrainer
 
 from tempfile import TemporaryDirectory
 
+
 class B4rVaeDataset(object):
     def __init__(self, user_actions, val_actions, user_id, item_id):
         self.user_actions = user_actions
