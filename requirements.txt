@@ -20,3 +20,7 @@ pytest>=7.1.2
 pytest-forked>=1.4.0
 setuptools>=59.5.0
 kmeans-pytorch
+torch
+datasets
+ir_measures
+torchinfo
