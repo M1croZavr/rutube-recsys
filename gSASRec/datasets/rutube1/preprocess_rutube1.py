@@ -26,13 +26,15 @@ def train_val_test_split():
             if len(user_item) != 2:
                 continue
             user, item = user_item
-            # items are enumerated from 1
             user = int(user) + 1
-            item = int(item) + 1
+            item = int(item)
             user_items[user].append(item)
     # Filter users which have less than 5 items
     user_items = {user: items for user, items in user_items.items() if len(items) >= 5}
     items = {item for items in user_items.values() for item in items}
+    # Renumber filtered items id to match 1, 2, 3, 4 ... pattern and items are enumerated from 1
+    items_renumbering = dict(zip(sorted(list(items)), range(1, len(items) + 1)))
+    user_items = {user: [items_renumbering[item] for item in items] for user, items in user_items.items()}
     num_interactions = sum(map(len, user_items.values()))
     dataset_stats = {
         "num_users": len(user_items),
