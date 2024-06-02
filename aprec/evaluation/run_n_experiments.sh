@@ -1,5 +1,5 @@
-config=$1
-N=$2
+config = $1
+N = $2
 
 if [ "$CHECK_COMMIT_STATUS" != "false" ]; then
     if [ -n "$(git status --porcelain)" ]; then

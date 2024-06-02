@@ -1,5 +1,5 @@
-data/
-data
+#data/
+#data
 !data/bert4rec/rutube.txt
 .idea/
 evaluation/results/*
