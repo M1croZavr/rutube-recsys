@@ -20,7 +20,7 @@ def original_ber4rec():
 
 
 recommenders = {
-    "original_bert4rec-default": lambda: original_ber4rec
+    "original_bert4rec": lambda: original_ber4rec()
 }
 
 # Параметр - до скольки айтемов дополнять тестовый список actionов
