@@ -20,7 +20,7 @@ def config():
     config = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(config)
     if len(sys.argv) > 2:
-        # e.g. ./results/rutube_benchmark_2024_01_01T12_12_12/experiment_${i}.json
+        # e.g. ./results/rutube_benchmark_2024_01_01T12_12_12/experiment_1.json
         config.out_file = open(sys.argv[2], 'w')
         # e.g. ./results/rutube_benchmark_2024_01_01T12_12_12/
         config.out_dir = os.path.dirname(sys.argv[2])
@@ -42,6 +42,7 @@ def run_experiment(config):
     # e.g. "BERT4rec.rutube"
     print(f"Dataset: {config.DATASET}")
     print("Reading  data...")
+    # List of all actions (Action instances) from .txt file
     all_actions = [action for action in DatasetsRegister()[config.DATASET]()]
     print("DONE\n")
     callbacks = ()
@@ -93,6 +94,9 @@ def run_experiment(config):
         # Его __call__ принимает actions и возвращает train и test списки из actions (отсортированные по timestamp),
         # где в train actions до последнего timestamp, а в test action последнего timestamp для этого user_id
         # Количество user_id в test определяется MAX_TEST_USERS и выбираются случайно
+
+        # WeekOut
+        # Его __call__ принимает actions и возвращает train и test, где тест просто берется из другого файла
         data_splitter = config.SPLIT_STRATEGY
         target_items_sampler = None
         if hasattr(config, "TARGET_ITEMS_SAMPLER"):
@@ -105,20 +109,29 @@ def run_experiment(config):
         if hasattr(config, "FILTER_COLD_START"):
             filter_cold_start = config.FILTER_COLD_START
 
-        recommender_evaluator = RecommendersEvaluator(actions,
-                                                      config.RECOMMENDERS,
-                                                      config.METRICS,
-                                                      config.out_dir,
-                                                      data_splitter,
-                                                      n_val_users,
-                                                      recommendations_limit,
-                                                      callbacks,
-                                                      users=users,
-                                                      items=items,
-                                                      experiment_config=config,
-                                                      target_items_sampler=target_items_sampler,
-                                                      remove_cold_start=filter_cold_start
-                                                      )
+        recommender_evaluator = RecommendersEvaluator(
+            # All actions from .txt
+            actions,
+            # Dict of recommender_name -> function which returns a recommender
+            config.RECOMMENDERS,
+            # Metrics functions list
+            config.METRICS,
+            # e.g. ./results/rutube_benchmark_2024_01_01T12_12_12/
+            config.out_dir,
+            # Train test splitter
+            data_splitter,
+            # FOR WHAT?
+            n_val_users,
+            recommendations_limit,
+            callbacks,
+            users=users,
+            items=items,
+            experiment_config=config,
+            # Sampling negatives for test items
+            target_items_sampler=target_items_sampler,
+            # Remove those test actions which users were not presented in a train sample
+            remove_cold_start=filter_cold_start
+        )
 
         if hasattr(config, 'FEATURES_FROM_TEST'):
             recommender_evaluator.set_features_from_test(config.FEATURES_FROM_TEST)

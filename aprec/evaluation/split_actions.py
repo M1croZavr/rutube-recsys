@@ -1,6 +1,10 @@
+import os
 from collections import defaultdict
 
 import numpy as np
+
+from aprec.api.action import Action
+from aprec.utils.os_utils import get_dir
 
 
 class ActionsSplitter(object):
@@ -120,4 +124,26 @@ class RandomSplit(ActionsSplitter):
                         train.append(users[user_id][action_id])
             else:
                 train += users[user_id]
+        return sorted(train, key=lambda x: x.timestamp), sorted(test, key=lambda x: x.timestamp)
+
+
+class TestFileSplit(ActionsSplitter):
+    def __init__(self, file_path):
+        """file_path - relative path from project root. E.g. 'data/bert4rec/rutube_week_test.txt'"""
+        self.file_path = file_path
+
+    def __call__(self, actions):
+        train = actions
+        dataset_filename = os.path.join(get_dir(), self.file_path)
+        test = []
+        prev_user = None
+        current_timestamp = 0
+        with open(dataset_filename) as dataset_file:
+            for line in dataset_file:
+                user, item = tuple(map(str, line.strip().split()))
+                if user != prev_user:
+                    current_timestamp = 0
+                prev_user = user
+                current_timestamp += 1
+                test.append(Action(user, item, current_timestamp))
         return sorted(train, key=lambda x: x.timestamp), sorted(test, key=lambda x: x.timestamp)

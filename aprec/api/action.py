@@ -1,4 +1,6 @@
 import json
+
+
 class Action(object):
     def __init__(self, user_id, item_id, timestamp, data=None):
         if data is None:

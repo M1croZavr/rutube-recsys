@@ -38,8 +38,10 @@ def evaluate_recommender(recommender, test_actions,
             requests.append((user_id, None))
 
     print("\tGenerating predictions...")
+    # List of [(item_id, score), ...]
     all_predictions = recommender.recommend_batch(requests, recommendations_limit)
 
+    # Dict of user_id -> sorted by score predictions [(item_id, score), ...]
     if evaluate_on_samples:
         sampled_rankings = recommender.get_item_rankings()
 
@@ -105,8 +107,10 @@ class RecommendersEvaluator(object):
         self.out_dir = out_dir
         self.features_from_test = None
         self.n_val_users = n_val_users
+        # Split on test and train
         self.train, self.test = self.data_splitter(actions)
         self.save_split(self.train, self.test)
+        # Cold start
         if remove_cold_start:
             # Remove those test actions which users were not presented in a train sample
             self.test = filter_cold_start(self.train, self.test)
@@ -120,7 +124,7 @@ class RecommendersEvaluator(object):
         if target_items_sampler is not None:
             # Sample items for test users
             target_items_sampler.set_actions(self.actions, self.test)
-            # [ItemsRankingRequest(user_id=user_id, item_ids=list(target_items)), ...]
+            # [ItemsRankingRequest(user_id=user_id, item_ids=list(sampled_target_items)), ...]
             self.sampled_requests = target_items_sampler.get_sampled_ranking_requests()
         self.experiment_config = experiment_config
 
@@ -142,6 +146,7 @@ class RecommendersEvaluator(object):
                 print("\tAdding train actions...")
                 for action in tqdm(self.train, ascii=True):
                     recommender.add_action(action)
+                # ???
                 recommender.set_val_users(self.val_user_ids)
                 print("\tRebuilding model...")
 
@@ -158,6 +163,7 @@ class RecommendersEvaluator(object):
                 build_time_start = time.time()
                 if self.sampled_requests is not None:
                     for request in self.sampled_requests:
+                        # Just append to list
                         recommender.add_test_items_ranking_request(request)
 
                 recommender.rebuild_model()

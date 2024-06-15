@@ -24,6 +24,8 @@ class DatasetsRegister(object):
         "BERT4rec.beauty": lambda: get_bert4rec_dataset("beauty"),
         "BERT4rec.rutube": lambda: get_bert4rec_dataset("rutube"),
         "BERT4rec.rutube_119258": lambda: get_bert4rec_dataset("rutube_119258"),
+        "BERT4rec.rutube_week": lambda: get_bert4rec_dataset("rutube_week_train"),
+        # NEW DATASET PLACEHOLDER
         "ml-20m": lambda: get_movielens20m_actions(min_rating=0.0),
         "ml-25m": lambda: get_movielens25m_actions(min_rating=0.0),
         "ml-100k": lambda: get_movielens100k_actions(min_rating=0.0),
@@ -49,7 +51,9 @@ class DatasetsRegister(object):
 
     @staticmethod
     def get_from_cache(dataset_id):
+        # Creates aprec/data/cache directory (inside library)
         cache_dir = mkdir_p_local(DatasetsRegister.DATA_DIR)
+        # Pickle dataset file in aprec/data/cache directory
         dataset_file = os.path.join(cache_dir, dataset_id + ".pickle")
         if not os.path.isfile(dataset_file):
             DatasetsRegister.cache_dataset(dataset_file, dataset_id)

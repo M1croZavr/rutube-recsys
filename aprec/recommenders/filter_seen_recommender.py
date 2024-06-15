@@ -6,6 +6,7 @@ INF = float('inf')
 
 
 class FilterSeenRecommender(Recommender):
+    """Фильтрует айтемы, которые были на трейне при выдаче прогнозов"""
     def __init__(self, recommender):
         super().__init__()
         self.recommender = recommender

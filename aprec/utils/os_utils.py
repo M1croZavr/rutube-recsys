@@ -4,6 +4,7 @@ import shlex
 import logging
 import hashlib
 
+
 def get_dir():
     utils_dirname = os.path.dirname(os.path.abspath(__file__))
     lib_dirname = os.path.abspath(os.path.join(utils_dirname, ".."))

@@ -3,3 +3,5 @@ aprec_repro.egg-info
 .DS_Store
 __pycache__
 /results
+/data/*.csv
+.ipynb_checkpoints

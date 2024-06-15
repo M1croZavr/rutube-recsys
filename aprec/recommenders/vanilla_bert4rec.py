@@ -85,6 +85,8 @@ class VanillaBERT4Rec(Recommender):
         for user in self.user_actions:
             self.user_actions[user].sort(key=lambda action: action.timestamp)
             user_str, doc = self.get_bert4rec_doc(user)
+            # Train items for the user:
+            # [ITEM_ID, ..., [PRED]]
             doc_for_prediction = doc + pred_item
 
             # mask_last code in the vanilla bert4rec implementation requires at least two docs in the collection

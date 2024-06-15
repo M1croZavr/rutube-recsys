@@ -19,4 +19,12 @@ config = GSASRecExperimentConfig(
 
 
 if __name__ == '__main__':
-    print(MAP @ 10, MRR, Precision @ 10)
+    print(nDCG @ 10, MAP @ 10, MRR, Precision @ 10, Recall @ 1)
+
+gSASRec_test_result = {
+    nDCG@10: 0.037238506592572565,
+    Recall@10: 0.07088220295767465,
+    MAP@10: 0.026981901038504816,
+    Precision@10: 0.007088220295767497,
+    MRR: 0.026981901038504816
+}
