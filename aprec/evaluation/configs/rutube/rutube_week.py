@@ -86,7 +86,7 @@ def dnn(model_arch, loss, sequence_splitter,
 
 
 vanilla_sasrec = lambda: dnn(
-    SASRec(max_history_len=HISTORY_LEN,
+    SASRec(max_history_len=50,
            dropout_rate=0.2,
            num_heads=1,
            num_blocks=2,
@@ -96,14 +96,14 @@ vanilla_sasrec = lambda: dnn(
     BCELoss(),
     ShiftedSequenceSplitter,
     optimizer=Adam(beta_2=0.98),
-    target_builder=lambda: NegativePerPositiveTargetBuilder(HISTORY_LEN),
+    target_builder=lambda: NegativePerPositiveTargetBuilder(50),
     metric=BCELoss(),
 )
 
 
 recommenders = {
     # "original_bert4rec": original_ber4rec,
-    "our_bert4rec": our_bert4rec,
+    # "our_bert4rec": our_bert4rec,  # XYETA
     "original_sasrec": vanilla_sasrec,
     # "recbole_bert4rec": recbole_bert4rec,
     # "b4vae_bert4rec": b4rvae_bert4rec,
