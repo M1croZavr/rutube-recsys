@@ -45,29 +45,22 @@ def recbole_bert4rec(epochs=None):
     return RecboleBERT4RecRecommender(epochs=epochs)
 
 
-def our_bert4rec(
-        relative_position_encoding=False, sequence_len=50, rss=lambda n, k: 1, layers=2, arch=BERT4Rec,
-        masking_prob=0.5, max_predictions_per_seq=20
-):
+def our_bert4rec(relative_position_encoding=False, sequence_len=50, rss=lambda n, k: 1, layers=2, arch=BERT4Rec,
+                 masking_prob=0.2, max_predictions_per_seq=20):
     model = arch(max_history_len=sequence_len)
-    recommender = DNNSequentialRecommender(
-        model, train_epochs=10000, early_stop_epochs=200,
-        batch_size=64,
-        training_time_limit=3600000,
-        loss=MeanPredLoss(),
-        debug=True,
-        sequence_splitter=lambda: ItemsMasking(
-            masking_prob=masking_prob,
-            max_predictions_per_seq=max_predictions_per_seq,
-            recency_importance=rss
-        ),
-        targets_builder=lambda: ItemsMaskingTargetsBuilder(
-            relative_positions_encoding=relative_position_encoding
-        ),
-        val_sequence_splitter=lambda: ItemsMasking(force_last=True),
-        metric=MeanPredLoss(),
-        pred_history_vectorizer=AddMaskHistoryVectorizer(),
-    )
+    recommender = DNNSequentialRecommender(model, train_epochs=10000, early_stop_epochs=200,
+                                           batch_size=64,
+                                           training_time_limit=3600000,
+                                           loss=MeanPredLoss(),
+                                           debug=True, sequence_splitter=lambda: ItemsMasking(masking_prob=masking_prob,
+                                                                                              max_predictions_per_seq=max_predictions_per_seq,
+                                                                                              recency_importance=rss),
+                                           targets_builder=lambda: ItemsMaskingTargetsBuilder(
+                                               relative_positions_encoding=relative_position_encoding),
+                                           val_sequence_splitter=lambda: ItemsMasking(force_last=True),
+                                           metric=MeanPredLoss(),
+                                           pred_history_vectorizer=AddMaskHistoryVectorizer(),
+                                           )
     return recommender
 
 
@@ -92,30 +85,28 @@ def dnn(model_arch, loss, sequence_splitter,
                                     )
 
 
-def vanilla_sasrec():
-    recommender = lambda: dnn(
-        SASRec(max_history_len=50,
-               dropout_rate=0.2,
-               num_heads=1,
-               num_blocks=2,
-               vanilla=True,
-               embedding_size=50,
-               ),
-        BCELoss(),
-        ShiftedSequenceSplitter,
-        optimizer=Adam(beta_2=0.98),
-        target_builder=lambda: NegativePerPositiveTargetBuilder(50),
-        metric=BCELoss(),
-    )
-    return recommender
+vanilla_sasrec = lambda: dnn(
+    SASRec(max_history_len=HISTORY_LEN,
+           dropout_rate=0.2,
+           num_heads=1,
+           num_blocks=2,
+           vanilla=True,
+           embedding_size=50,
+           ),
+    BCELoss(),
+    ShiftedSequenceSplitter,
+    optimizer=Adam(beta_2=0.98),
+    target_builder=lambda: NegativePerPositiveTargetBuilder(HISTORY_LEN),
+    metric=BCELoss(),
+)
 
 
 recommenders = {
     # "original_bert4rec": original_ber4rec,
-    "aprec_bert4rec": our_bert4rec,
+    "our_bert4rec": our_bert4rec,
     "original_sasrec": vanilla_sasrec,
     # "recbole_bert4rec": recbole_bert4rec,
-    "b4vae_bert4rec": b4rvae_bert4rec,
+    # "b4vae_bert4rec": b4rvae_bert4rec,
 }
 
 
