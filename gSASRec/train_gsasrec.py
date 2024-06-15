@@ -18,14 +18,15 @@ args = parser.parse_args()
 # GSASRecExperimentConfig object
 config = load_config(args.config)
 
-num_items = get_num_items(config.dataset_name) 
+num_items = get_num_items(config.dataset_name)
 device = get_device()
 # GSASRec object
 model = build_model(config)
 
 train_dataloader = get_train_dataloader(config.dataset_name, batch_size=config.train_batch_size,
-                                         max_length=config.sequence_length, train_neg_per_positive=config.negs_per_pos)
-val_dataloader = get_val_dataloader(config.dataset_name, batch_size=config.eval_batch_size, max_length=config.sequence_length)
+                                        max_length=config.sequence_length, train_neg_per_positive=config.negs_per_pos)
+val_dataloader = get_val_dataloader(config.dataset_name, batch_size=config.eval_batch_size,
+                                    max_length=config.sequence_length)
 
 optimiser = torch.optim.Adam(model.parameters())
 batches_per_epoch = min(config.max_batches_per_epoch, len(train_dataloader))
@@ -39,7 +40,7 @@ model = model.to(device)
 summary(model, (config.train_batch_size, config.sequence_length), batch_dim=None)
 
 for epoch in range(config.max_epochs):
-    model.train()   
+    model.train()
     batch_iter = iter(train_dataloader)
     pbar = tqdm(range(batches_per_epoch))
     loss_sum = 0
@@ -59,18 +60,19 @@ for epoch in range(config.max_epochs):
         gt[:, :, 0] = 1
 
         alpha = config.negs_per_pos / (num_items - 1)
-        t = config.gbce_t 
-        beta = alpha * ((1 - 1/alpha)*t + 1/alpha)
-        
-        positive_logits = logits[:, :, 0:1].to(torch.float64) #use float64 to increase numerical stability
-        negative_logits = logits[:,:,1:].to(torch.float64)
+        t = config.gbce_t
+        beta = alpha * ((1 - 1 / alpha) * t + 1 / alpha)
+
+        positive_logits = logits[:, :, 0:1].to(torch.float64)  # use float64 to increase numerical stability
+        negative_logits = logits[:, :, 1:].to(torch.float64)
         eps = 1e-10
-        positive_probs = torch.clamp(torch.sigmoid(positive_logits), eps, 1-eps)
-        positive_probs_adjusted = torch.clamp(positive_probs.pow(-beta), 1+eps, torch.finfo(torch.float64).max)
-        to_log = torch.clamp(torch.div(1.0, (positive_probs_adjusted  - 1)), eps, torch.finfo(torch.float64).max)
+        positive_probs = torch.clamp(torch.sigmoid(positive_logits), eps, 1 - eps)
+        positive_probs_adjusted = torch.clamp(positive_probs.pow(-beta), 1 + eps, torch.finfo(torch.float64).max)
+        to_log = torch.clamp(torch.div(1.0, (positive_probs_adjusted - 1)), eps, torch.finfo(torch.float64).max)
         positive_logits_transformed = to_log.log()
         logits = torch.cat([positive_logits_transformed, negative_logits], -1)
-        loss_per_element = torch.nn.functional.binary_cross_entropy_with_logits(logits, gt, reduction='none').mean(-1)*mask
+        loss_per_element = torch.nn.functional.binary_cross_entropy_with_logits(logits, gt, reduction='none').mean(
+            -1) * mask
         loss = loss_per_element.sum() / mask.sum()
         loss.backward()
         optimiser.step()
@@ -78,12 +80,12 @@ for epoch in range(config.max_epochs):
         loss_sum += loss.item()
         pbar.set_description(f"Epoch {epoch} loss: {loss_sum / (batch_idx + 1)}")
 
-    evaluation_result = evaluate(model, val_dataloader, config.metrics, config.recommendation_limit, 
-                                 config.filter_rated, device=device) 
+    evaluation_result = evaluate(model, val_dataloader, config.metrics, config.recommendation_limit,
+                                 config.filter_rated, device=device)
     print(f"Epoch {epoch} evaluation result: {evaluation_result}")
     if evaluation_result[config.val_metric] > best_metric:
         best_metric = evaluation_result[config.val_metric]
-        model_name = f"models/gsasrec-{config.dataset_name}-step:{step}-t:{config.gbce_t}-negs:{config.negs_per_pos}-emb:{config.embedding_dim}-dropout:{config.dropout_rate}-metric:{best_metric}.pt" 
+        model_name = f"models/gsasrec-{config.dataset_name}-step:{step}-t:{config.gbce_t}-negs:{config.negs_per_pos}-emb:{config.embedding_dim}-dropout:{config.dropout_rate}-metric:{best_metric}.pt"
         print(f"Saving new best model to {model_name}")
         if best_model_name is not None:
             os.remove(best_model_name)

@@ -38,6 +38,7 @@ class SequenceDataset(Dataset):
 
 
 def collate_with_random_negatives(input_batch, pad_value, num_negatives):
+    # Склейка всех инпутов батча в двумерный тензор
     batch_cat = torch.stack([input_batch[i][0] for i in range(len(input_batch))], dim=0)
     negatives = torch.randint(low=1, high=pad_value, size=(batch_cat.size(0), batch_cat.size(1), num_negatives))
     return [batch_cat, negatives]
