@@ -9,6 +9,7 @@ from aprec.recommenders.filter_seen_recommender import FilterSeenRecommender
 
 USERS_FRACTIONS = [1.0]
 
+
 def b4rvae_bert4rec(epochs=None):
     return B4rVaeBert4Rec(epochs=epochs)
 
