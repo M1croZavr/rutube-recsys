@@ -25,6 +25,7 @@ class DatasetsRegister(object):
         "BERT4rec.rutube": lambda: get_bert4rec_dataset("rutube"),
         "BERT4rec.rutube_119258": lambda: get_bert4rec_dataset("rutube_119258"),
         "BERT4rec.rutube_week": lambda: get_bert4rec_dataset("rutube_week_train"),
+        "BERT4rec.rutube_237742i": lambda: get_bert4rec_dataset("rutube_237742i"),
         # NEW DATASET PLACEHOLDER
         "ml-20m": lambda: get_movielens20m_actions(min_rating=0.0),
         "ml-25m": lambda: get_movielens25m_actions(min_rating=0.0),
